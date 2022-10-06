@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32526.322
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "textureloader2", "textureloader2.csproj", "{977E2708-BA03-437E-8719-07EDE949E4FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{977E2708-BA03-437E-8719-07EDE949E4FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{977E2708-BA03-437E-8719-07EDE949E4FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{977E2708-BA03-437E-8719-07EDE949E4FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{977E2708-BA03-437E-8719-07EDE949E4FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D2FD6787-E66B-4C94-B443-34C0B2453620}
+	EndGlobalSection
+EndGlobal

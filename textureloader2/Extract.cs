@@ -12,7 +12,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Advanced;
 using YamlDotNet.Serialization;
 
-internal class Extract
+internal static class Extract
 {
     internal static string outputDir;
     internal static HashSet<TextureData> ignoreList;
@@ -24,32 +24,7 @@ internal class Extract
         map = new Dictionary<string, Dictionary<string, string>>();
 
         var am = new AssetsManager();
-
-        var assetFiles = new List<AssetsFileInstance>();
-        foreach (FileInfo file in new DirectoryInfo(assetDir).GetFiles())
-        {
-            if (file.Name.EndsWith(".resS") || file.Name.EndsWith(".resource")) continue;
-            assetFiles.Add(am.LoadAssetsFile(file.FullName, true));
-        }
-
-        am.LoadClassPackage("classdata.tpk");
-        am.LoadClassDatabaseFromPackage(assetFiles[0].file.typeTree.unityVersion);
-
-        var dict = new Dictionary<string, List<TextureData>>();
-
-        foreach (var inst in assetFiles)
-        {
-            foreach (var info in inst.table.GetAssetsOfType((int)AssetClassID.Texture2D))
-            {
-                var baseField = am.GetTypeInstance(inst, info).GetBaseField();
-                var textureFile = TextureFile.ReadTextureFile(baseField);
-                if (textureFile.m_Width == 0 || textureFile.m_Height == 0) continue;
-                string name = textureFile.m_Name;
-                if (name.StartsWith("LDR") || name.Contains("Atlas") || name.Contains("yodo") || name.Contains("ads") || name.Contains("ad-")) continue;
-                if (!dict.ContainsKey(name)) dict[name] = new List<TextureData>();
-                dict[name].Add(new TextureData(info, inst, am));
-            }
-        }
+        var dict = GetTextureDictionary(am, assetDir);
 
         foreach (KeyValuePair<string, List<TextureData>> kvPair in dict)
         {
@@ -153,8 +128,37 @@ internal class Extract
             }
         }
 
-        am.UnloadAllAssetsFiles();
+        am.UnloadAll();
         SaveMap();
+    }
+    public static Dictionary<string, List<TextureData>> GetTextureDictionary(AssetsManager am, string assetDir)
+    {
+        var assetFiles = new List<AssetsFileInstance>();
+        foreach (FileInfo file in new DirectoryInfo(assetDir).GetFiles())
+        {
+            if (file.Name.EndsWith(".resS") || file.Name.EndsWith(".resource")) continue;
+            assetFiles.Add(am.LoadAssetsFile(file.FullName, true));
+        }
+
+        am.LoadClassPackage("classdata.tpk");
+        am.LoadClassDatabaseFromPackage(assetFiles[0].file.typeTree.unityVersion);
+
+        var dict = new Dictionary<string, List<TextureData>>();
+
+        foreach (var inst in assetFiles)
+        {
+            foreach (var info in inst.table.GetAssetsOfType((int)AssetClassID.Texture2D))
+            {
+                var baseField = am.GetTypeInstance(inst, info).GetBaseField();
+                var textureFile = TextureFile.ReadTextureFile(baseField);
+                if (textureFile.m_Width == 0 || textureFile.m_Height == 0) continue;
+                string name = textureFile.m_Name;
+                if (name.StartsWith("LDR") || name.Contains("Atlas") || name.Contains("yodo") || name.Contains("ads") || name.Contains("ad-")) continue;
+                if (!dict.ContainsKey(name)) dict[name] = new List<TextureData>();
+                dict[name].Add(new TextureData(info, inst, am));
+            }
+        }
+        return dict;
     }
     private static void Save(string category, TextureData data)
     {

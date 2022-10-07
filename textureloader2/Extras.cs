@@ -75,7 +75,7 @@ internal class TextureData
     {
         this.instance = instance;
         this.info = info;
-        var baseField = am.GetTypeInstance(instance, info).GetBaseField();
+        this.baseField = am.GetTypeInstance(instance, info).GetBaseField();
         this.textureFile = TextureFile.ReadTextureFile(baseField);
         this.name = textureFile.m_Name;
         this.width = textureFile.m_Width;
@@ -89,6 +89,7 @@ internal class TextureData
     public string name;
     public int width;
     public int height;
+    public AssetTypeValueField baseField;
     public TextureFile textureFile;
     public Image<Rgba32> image;
     public string id;

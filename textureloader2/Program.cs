@@ -20,7 +20,7 @@ internal class Program
             var arg2 = new Option<string>(
                 "--output",
                 "Output directory path (directory must be empty)");
-            var command = new Command("extract", "Extract assets to a directory") { arg1, arg2 };
+            var command = new Command("extract", "Extract textures from assets to a directory") { arg1, arg2 };
             command.SetHandler(Extract.Run, arg1, arg2);
             root.AddCommand(command);
         }
@@ -29,20 +29,18 @@ internal class Program
                 "--assets",
                 "Path to directory of asset files");
             var arg2 = new Option<string>(
+                "--textures",
+                "Path to directory of modified extracted textures.");
+            var arg3 = new Option<string>(
                 "--output",
                 "Output directory path (directory must be empty)");
-            var command = new Command("pack", "Save assets from a directory to asset files") { arg1, arg2 };
-            command.SetHandler(Pack, arg1, arg2);
+            var command = new Command("pack", "Save textures from a directory to asset files") { arg1, arg2, arg3 };
+            command.SetHandler(Pack.Run, arg1, arg2, arg3);
             root.AddCommand(command);
         }
 
         Config.Init();
 
         await root.InvokeAsync(args);
-    }
-    
-    private static void Pack(string assetDir, string outputDir)
-    {
-
     }
 }

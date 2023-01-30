@@ -11,18 +11,25 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Formats.Webp;
 using YamlDotNet.Serialization;
 
 internal static class Extract
 {
     internal static string outputDir;
     internal static bool useWebp;
+    internal static WebpEncoder webpEncoder;
     internal static HashSet<TextureData> ignoreList;
     internal static Dictionary<string, Dictionary<string, string>> map;
     public static void Run(string assetPath, string outputDir, bool useWebp)
     {
         Extract.outputDir = outputDir;
         Extract.useWebp = useWebp;
+        if (useWebp)
+        {
+            webpEncoder = new WebpEncoder();
+            webpEncoder.FileFormat = WebpFileFormatType.Lossless;
+        }
         ignoreList = new HashSet<TextureData>();
         map = new Dictionary<string, Dictionary<string, string>>();
 
@@ -206,7 +213,7 @@ internal static class Extract
         // Console.WriteLine($"c: {category} n: {data.name}");
         string dir = Path.Combine(outputDir, category);
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-        if (useWebp) data.image.SaveAsWebp(Path.Combine(dir, data.name + ".webp")); // WEBP
+        if (useWebp) data.image.SaveAsWebp(Path.Combine(dir, data.name + ".webp"), webpEncoder); // WEBP
         else data.image.SaveAsPng(Path.Combine(dir, data.name + ".png")); // PNG
         ignoreList.Add(data);
 

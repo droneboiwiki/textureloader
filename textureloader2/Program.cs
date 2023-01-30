@@ -27,7 +27,7 @@ internal class Program
             arg3.AddAlias("-w");
             arg1.AddValidator(ValidateOptionA);
             arg2.AddValidator(r => ValidateOptionO(r, true));
-            var command = new Command("extract", "Extract textures from assets or .apk to a directory") { arg1, arg2 };
+            var command = new Command("extract", "Extract textures from assets or .apk to a directory") { arg1, arg2, arg3 };
             command.SetHandler(Extract.Run, arg1, arg2, arg3);
             root.AddCommand(command);
         }

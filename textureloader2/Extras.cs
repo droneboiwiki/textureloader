@@ -50,7 +50,7 @@ internal class ImageHelper
         }
         else textureData = textureFile.GetTextureData(inst);
         format = PixelFormat.BGRA;
-        Console.WriteLine($"{textureFile.m_Name}: {(TextureFormat)textureFormat}");
+        // Console.WriteLine($"{textureFile.m_Name}: {(TextureFormat)textureFormat}");
         if (textureData == null || textureData.Length == 0)
         {
             if (textureFormat == TextureFormat.DXT1Crunched)

@@ -10,11 +10,12 @@
   <ItemGroup>
     <PackageReference Include="Kyaru.Texture2DDecoder" Version="0.16.40" />
     <PackageReference Include="Kyaru.Texture2DDecoder.Windows" Version="0.1.0" />
+    <PackageReference Include="ShellProgressBar" Version="5.2.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="System.CommandLine.DragonFruit" Version="0.4.0-alpha.22272.1" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-    <PackageReference Include="YamlDotNet" Version="12.0.1" />
+    <PackageReference Include="YamlDotNet" Version="12.0.2" />
   </ItemGroup>
 
   <ItemGroup>

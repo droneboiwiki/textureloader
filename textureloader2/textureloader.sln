@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "textureloader2", "textureloader2.csproj", "{977E2708-BA03-437E-8719-07EDE949E4FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "textureloader", "textureloader.csproj", "{977E2708-BA03-437E-8719-07EDE949E4FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{91F473DC-A750-48AA-8907-554E148052F1}"
 	ProjectSection(SolutionItems) = preProject

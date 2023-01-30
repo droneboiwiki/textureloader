@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.IO.Compression;
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using SixLabors.ImageSharp;
@@ -15,16 +16,21 @@ using YamlDotNet.Serialization;
 internal static class Extract
 {
     internal static string outputDir;
+    internal static bool useWebp;
     internal static HashSet<TextureData> ignoreList;
     internal static Dictionary<string, Dictionary<string, string>> map;
-    public static void Run(string assetDir, string outputDir)
+    public static void Run(string assetPath, string outputDir, bool useWebp)
     {
         Extract.outputDir = outputDir;
+        Extract.useWebp = useWebp;
         ignoreList = new HashSet<TextureData>();
         map = new Dictionary<string, Dictionary<string, string>>();
 
+        bool isApk = assetPath.EndsWith(".apk");
+        if (isApk) Console.WriteLine("!IMPORTANT!\nSome textures (e.g. background, ui, skins) cannot be extracted from .APKs due to some texture formats not being supported.\nIt is recommended to use textures from the Steam PC version instead.");
+
         var am = new AssetsManager();
-        var dict = GetTextureDictionary(am, assetDir);
+        var dict = GetTextureDictionary(am, assetPath);
 
         foreach (KeyValuePair<string, List<TextureData>> kvPair in dict)
         {
@@ -131,10 +137,10 @@ internal static class Extract
         am.UnloadAll();
         SaveMap();
     }
-    public static Dictionary<string, List<TextureData>> GetTextureDictionary(AssetsManager am, string assetDir)
+    public static Dictionary<string, List<TextureData>> GetTextureDictionary(AssetsManager am, string assetsDir)
     {
         var assetFiles = new List<AssetsFileInstance>();
-        foreach (FileInfo file in new DirectoryInfo(assetDir).GetFiles())
+        foreach (FileInfo file in new DirectoryInfo(assetsDir).GetFiles())
         {
             if (file.Name.EndsWith(".resS") || file.Name.EndsWith(".resource")) continue;
             assetFiles.Add(am.LoadAssetsFile(file.FullName, true));
@@ -143,19 +149,54 @@ internal static class Extract
         am.LoadClassPackage("classdata.tpk");
         am.LoadClassDatabaseFromPackage(assetFiles[0].file.typeTree.unityVersion);
 
-        var dict = new Dictionary<string, List<TextureData>>();
+        return FilterTexturesToDictionary(am, assetFiles);
+    }
+    public static Dictionary<string, List<TextureData>> GetApkTextureDictionary(AssetsManager am, string apkPath)
+    {
+        var apkStream = File.OpenRead(apkPath);
+        string tmpBunPath;
+        using (ZipArchive archive = new ZipArchive(apkStream))
+        {
+            var bunEntry = archive.GetEntry("assets/bin/Data/data.unity3d");
+            if (bunEntry == null) Program.Error("Expected files do not exist in apk");
+            tmpBunPath = StringHelper.GenerateRandomPath();
+            bunEntry.ExtractToFile(tmpBunPath);
+        }
 
+        var bun = am.LoadBundleFile(tmpBunPath, true);
+        
+        var assetFiles = new List<AssetsFileInstance>();
+        for (int i = 0; i < bun.file.bundleInf6.dirInf.Length; i++)
+        {
+            var dir = bun.file.bundleInf6.dirInf[i];
+            if (dir.name.EndsWith(".resS") || dir.name.EndsWith(".resource")) continue;
+            Console.WriteLine(dir.name);
+            assetFiles.Add(am.LoadAssetsFileFromBundle(bun, i, true));
+        }
+
+        am.LoadClassPackage("classdata.tpk");
+        am.LoadClassDatabaseFromPackage(assetFiles[0].file.typeTree.unityVersion);
+        Console.WriteLine(assetFiles[0].file.typeTree.unityVersion);
+
+        return FilterTexturesToDictionary(am, assetFiles, bun.file);
+    }
+    private static Dictionary<string, List<TextureData>> FilterTexturesToDictionary(AssetsManager am, List<AssetsFileInstance> assetFiles, AssetBundleFile? bundle = null)
+    {
+        var dict = new Dictionary<string, List<TextureData>>();
         foreach (var inst in assetFiles)
         {
             foreach (var info in inst.table.GetAssetsOfType((int)AssetClassID.Texture2D))
             {
                 var baseField = am.GetTypeInstance(inst, info).GetBaseField();
                 var textureFile = TextureFile.ReadTextureFile(baseField);
+                // Console.WriteLine($"{inst.name}, {textureFile.m_Name}, {textureFile.pictureData.Length}, {textureFile.m_StreamData.path}");
                 if (textureFile.m_Width == 0 || textureFile.m_Height == 0) continue;
                 string name = textureFile.m_Name;
                 if (name.StartsWith("LDR") || name.Contains("Atlas") || name.Contains("yodo") || name.Contains("ads") || name.Contains("ad-")) continue;
                 if (!dict.ContainsKey(name)) dict[name] = new List<TextureData>();
-                dict[name].Add(new TextureData(info, inst, am));
+                var textureData = bundle == null ? new TextureData(info, inst, am) : new TextureData(info, inst, bundle, am);
+                if (textureData.image == null) continue;
+                dict[name].Add(textureData);
             }
         }
         return dict;
@@ -165,7 +206,8 @@ internal static class Extract
         // Console.WriteLine($"c: {category} n: {data.name}");
         string dir = Path.Combine(outputDir, category);
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-        data.image.SaveAsPng(Path.Combine(dir, data.name + ".png"));
+        if (useWebp) data.image.SaveAsWebp(Path.Combine(dir, data.name + ".webp")); // WEBP
+        else data.image.SaveAsPng(Path.Combine(dir, data.name + ".png")); // PNG
         ignoreList.Add(data);
 
         if (!map.ContainsKey(category)) map[category] = new Dictionary<string, string>();
